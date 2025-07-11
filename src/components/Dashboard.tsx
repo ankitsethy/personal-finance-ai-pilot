@@ -17,13 +17,15 @@ import {
   Settings,
   ChevronRight,
   ArrowUpRight,
-  ArrowDownRight
+  ArrowDownRight,
+  LogOut
 } from 'lucide-react';
 import { FinancialOverview } from '@/components/FinancialOverview';
 import { SpendingAnalysis } from '@/components/SpendingAnalysis';
 import { InvestmentPortfolio } from '@/components/InvestmentPortfolio';
 import { GoalTracker } from '@/components/GoalTracker';
 import { AIChat } from '@/components/AIChat';
+import { useAuth } from '@/hooks/useAuth';
 
 interface DashboardProps {
   userProfile: any;
@@ -32,6 +34,11 @@ interface DashboardProps {
 export const Dashboard = ({ userProfile }: DashboardProps) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [showAIChat, setShowAIChat] = useState(false);
+  const { signOut, user } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
@@ -45,7 +52,7 @@ export const Dashboard = ({ userProfile }: DashboardProps) => {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-900">FinanceAI</h1>
-                <p className="text-sm text-gray-600">Welcome back, {userProfile?.name}</p>
+                <p className="text-sm text-gray-600">Welcome back, {user?.email?.split('@')[0]}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -67,6 +74,14 @@ export const Dashboard = ({ userProfile }: DashboardProps) => {
               </Button>
               <Button variant="ghost" size="sm">
                 <Settings className="h-4 w-4" />
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handleSignOut}
+                className="text-red-600 hover:text-red-700"
+              >
+                <LogOut className="h-4 w-4" />
               </Button>
             </div>
           </div>
