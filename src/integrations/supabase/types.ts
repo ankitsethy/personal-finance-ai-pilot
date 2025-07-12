@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      budgets: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          month: number
+          monthly_limit: number
+          updated_at: string
+          user_id: string
+          year: number
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          month: number
+          monthly_limit: number
+          updated_at?: string
+          user_id: string
+          year: number
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          month?: number
+          monthly_limit?: number
+          updated_at?: string
+          user_id?: string
+          year?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -45,7 +78,10 @@ export type Database = {
           created_at: string
           date: string
           id: string
+          is_recurring: boolean | null
+          next_occurrence: string | null
           note: string | null
+          recurring_frequency: string | null
           type: Database["public"]["Enums"]["transaction_type"]
           user_id: string
         }
@@ -55,7 +91,10 @@ export type Database = {
           created_at?: string
           date?: string
           id?: string
+          is_recurring?: boolean | null
+          next_occurrence?: string | null
           note?: string | null
+          recurring_frequency?: string | null
           type: Database["public"]["Enums"]["transaction_type"]
           user_id: string
         }
@@ -65,7 +104,10 @@ export type Database = {
           created_at?: string
           date?: string
           id?: string
+          is_recurring?: boolean | null
+          next_occurrence?: string | null
           note?: string | null
+          recurring_frequency?: string | null
           type?: Database["public"]["Enums"]["transaction_type"]
           user_id?: string
         }
@@ -76,7 +118,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_budget_usage: {
+        Args: {
+          budget_user_id: string
+          budget_category: string
+          budget_month: number
+          budget_year: number
+        }
+        Returns: number
+      }
     }
     Enums: {
       transaction_type: "income" | "expense"

@@ -3,8 +3,12 @@ import React, { useState } from 'react';
 import { TransactionForm } from '@/components/TransactionForm';
 import { TransactionList } from '@/components/TransactionList';
 import { TransactionChart } from '@/components/TransactionChart';
+import { BudgetManager } from '@/components/BudgetManager';
+import { RecurringTransactions } from '@/components/RecurringTransactions';
+import { ExportFeatures } from '@/components/ExportFeatures';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LogOut, DollarSign } from 'lucide-react';
 
 const Transactions = () => {
@@ -48,22 +52,50 @@ const Transactions = () => {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Transaction Form */}
-          <div className="lg:col-span-1">
-            <TransactionForm onTransactionAdded={handleTransactionAdded} />
-          </div>
+        <Tabs defaultValue="overview" className="space-y-6">
+          <TabsList className="grid grid-cols-2 lg:grid-cols-5 bg-white/80 backdrop-blur-sm">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="budgets">Budgets</TabsTrigger>
+            <TabsTrigger value="recurring">Recurring</TabsTrigger>
+            <TabsTrigger value="export">Export</TabsTrigger>
+            <TabsTrigger value="analytics" className="hidden lg:block">Analytics</TabsTrigger>
+          </TabsList>
 
-          {/* Transaction List */}
-          <div className="lg:col-span-2">
-            <TransactionList refreshTrigger={refreshTrigger} />
-          </div>
-        </div>
+          <TabsContent value="overview" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Transaction Form */}
+              <div className="lg:col-span-1">
+                <TransactionForm onTransactionAdded={handleTransactionAdded} />
+              </div>
 
-        {/* Charts and Summary */}
-        <div className="mt-8">
-          <TransactionChart refreshTrigger={refreshTrigger} />
-        </div>
+              {/* Transaction List */}
+              <div className="lg:col-span-2">
+                <TransactionList refreshTrigger={refreshTrigger} />
+              </div>
+            </div>
+
+            {/* Charts and Summary */}
+            <div className="mt-8">
+              <TransactionChart refreshTrigger={refreshTrigger} />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="budgets">
+            <BudgetManager refreshTrigger={refreshTrigger} />
+          </TabsContent>
+
+          <TabsContent value="recurring">
+            <RecurringTransactions refreshTrigger={refreshTrigger} />
+          </TabsContent>
+
+          <TabsContent value="export">
+            <ExportFeatures refreshTrigger={refreshTrigger} />
+          </TabsContent>
+
+          <TabsContent value="analytics">
+            <TransactionChart refreshTrigger={refreshTrigger} />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

@@ -7,10 +7,12 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Checkbox } from '@/components/ui/checkbox';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Plus, DollarSign } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { addDays, addWeeks, addMonths, addQuarters, addYears } from 'date-fns';
 
 interface TransactionFormProps {
   onTransactionAdded: () => void;
@@ -25,7 +27,9 @@ export const TransactionForm = ({ onTransactionAdded }: TransactionFormProps) =>
     amount: '',
     category: '',
     note: '',
-    date: new Date().toISOString().split('T')[0]
+    date: new Date().toISOString().split('T')[0],
+    is_recurring: false,
+    recurring_frequency: ''
   });
 
   const expenseCategories = [
@@ -37,22 +41,50 @@ export const TransactionForm = ({ onTransactionAdded }: TransactionFormProps) =>
     'Salary', 'Freelance', 'Business', 'Investment', 'Gift', 'Other'
   ];
 
+  const calculateNextOccurrence = (date: Date, frequency: string): Date => {
+    switch (frequency) {
+      case 'weekly':
+        return addWeeks(date, 1);
+      case 'biweekly':
+        return addWeeks(date, 2);
+      case 'monthly':
+        return addMonths(date, 1);
+      case 'quarterly':
+        return addQuarters(date, 1);
+      case 'yearly':
+        return addYears(date, 1);
+      default:
+        return addMonths(date, 1);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
 
     setLoading(true);
     try {
+      const transactionData: any = {
+        user_id: user.id,
+        type: formData.type,
+        amount: parseFloat(formData.amount),
+        category: formData.category,
+        note: formData.note || null,
+        date: formData.date,
+        is_recurring: formData.is_recurring
+      };
+
+      if (formData.is_recurring && formData.recurring_frequency) {
+        transactionData.recurring_frequency = formData.recurring_frequency;
+        transactionData.next_occurrence = calculateNextOccurrence(
+          new Date(formData.date), 
+          formData.recurring_frequency
+        ).toISOString().split('T')[0];
+      }
+
       const { error } = await supabase
         .from('transactions')
-        .insert({
-          user_id: user.id,
-          type: formData.type,
-          amount: parseFloat(formData.amount),
-          category: formData.category,
-          note: formData.note || null,
-          date: formData.date
-        });
+        .insert(transactionData);
 
       if (error) throw error;
 
@@ -67,7 +99,9 @@ export const TransactionForm = ({ onTransactionAdded }: TransactionFormProps) =>
         amount: '',
         category: '',
         note: '',
-        date: new Date().toISOString().split('T')[0]
+        date: new Date().toISOString().split('T')[0],
+        is_recurring: false,
+        recurring_frequency: ''
       });
 
       onTransactionAdded();
@@ -166,6 +200,44 @@ export const TransactionForm = ({ onTransactionAdded }: TransactionFormProps) =>
               value={formData.note}
               onChange={(e) => setFormData({ ...formData, note: e.target.value })}
             />
+          </div>
+
+          <div className="space-y-3 p-3 bg-gray-50 rounded-lg">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="is_recurring"
+                checked={formData.is_recurring}
+                onCheckedChange={(checked) => setFormData({ 
+                  ...formData, 
+                  is_recurring: !!checked,
+                  recurring_frequency: checked ? 'monthly' : ''
+                })}
+              />
+              <Label htmlFor="is_recurring" className="text-sm font-medium">
+                This is a recurring transaction
+              </Label>
+            </div>
+
+            {formData.is_recurring && (
+              <div>
+                <Label htmlFor="frequency">Frequency</Label>
+                <Select
+                  value={formData.recurring_frequency}
+                  onValueChange={(value) => setFormData({ ...formData, recurring_frequency: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select frequency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="weekly">Weekly</SelectItem>
+                    <SelectItem value="biweekly">Biweekly</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="quarterly">Quarterly</SelectItem>
+                    <SelectItem value="yearly">Yearly</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
 
           <Button 
