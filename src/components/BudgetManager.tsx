@@ -158,9 +158,21 @@ export const BudgetManager = ({ refreshTrigger }: BudgetManagerProps) => {
 
   const getBudgetStatus = (usage: number, limit: number) => {
     const percentage = (usage / limit) * 100;
-    if (percentage >= 100) return { status: 'exceeded', color: 'destructive', icon: AlertTriangle };
-    if (percentage >= 80) return { status: 'warning', color: 'secondary', icon: AlertTriangle };
-    return { status: 'good', color: 'default', icon: CheckCircle };
+    if (percentage >= 100) return { 
+      status: 'exceeded', 
+      variant: 'destructive' as const, 
+      icon: AlertTriangle 
+    };
+    if (percentage >= 80) return { 
+      status: 'warning', 
+      variant: 'secondary' as const, 
+      icon: AlertTriangle 
+    };
+    return { 
+      status: 'good', 
+      variant: 'default' as const, 
+      icon: CheckCircle 
+    };
   };
 
   const getAISuggestion = (budget: Budget) => {
@@ -287,7 +299,7 @@ export const BudgetManager = ({ refreshTrigger }: BudgetManagerProps) => {
         ) : (
           <div className="space-y-4">
             {budgets.map((budget) => {
-              const { status, color, icon: Icon } = getBudgetStatus(budget.usage || 0, budget.monthly_limit);
+              const { status, variant, icon: Icon } = getBudgetStatus(budget.usage || 0, budget.monthly_limit);
               const percentage = Math.min(((budget.usage || 0) / budget.monthly_limit) * 100, 100);
               const suggestion = getAISuggestion(budget);
 
@@ -296,7 +308,7 @@ export const BudgetManager = ({ refreshTrigger }: BudgetManagerProps) => {
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <h3 className="font-medium">{budget.category}</h3>
-                      <Badge variant={color}>
+                      <Badge variant={variant}>
                         <Icon className="h-3 w-3 mr-1" />
                         {status}
                       </Badge>
