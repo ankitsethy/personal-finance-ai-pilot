@@ -2,8 +2,7 @@
 import React from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { AuthForm } from '@/components/AuthForm';
-import { Dashboard } from '@/components/Dashboard';
-import { Onboarding } from '@/components/Onboarding';
+import Transactions from './Transactions';
 
 const Index = () => {
   const { user, loading } = useAuth();
@@ -23,8 +22,8 @@ const Index = () => {
     return <AuthForm />;
   }
 
-  // For authenticated users, show the existing onboarding/dashboard flow
-  return <Dashboard userProfile={{ name: user.email?.split('@')[0] }} />;
+  // For authenticated users, show the transactions dashboard
+  return <Transactions />;
 };
 
 export default Index;
